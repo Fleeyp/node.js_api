@@ -1,129 +1,91 @@
-const db = require("../config/database");
+const filterRepository = require("./filterRepository");
 
 class OrderRepository {
 
-    createOrder(order) {
+    async createOrder(order) {
 
-        return new Promise((resolve, reject) => {
-
-            db.run(
-                `INSERT INTO "Order"(orderId, value, creationDate) VALUES (?, ?, ?)`,
-                [order.orderId, order.value, order.creationDate],
-                (err) => {
-
-                    if (err) return reject(err);
-
-                    const stmt = db.prepare(
-                        `INSERT INTO Items(orderId, productId, quantity, price) VALUES (?, ?, ?, ?)`
-                    );
-
-                    order.items.forEach(item => {
-                        stmt.run(order.orderId, item.productId, item.quantity, item.price);
-                    });
-
-                    stmt.finalize();
-
-                    resolve();
-                }
-            );
-        });
-    }
-
-    getOrder(orderId) {
-
-        return new Promise((resolve, reject) => {
-
-            db.get(
-                `SELECT * FROM "Order" WHERE orderId = ?`,
-                [orderId],
-                (err, order) => {
-
-                    if (err) return reject(err);
-                    if (!order) return resolve(null);
-
-                    db.all(
-                        `SELECT productId, quantity, price FROM Items WHERE orderId = ?`,
-                        [orderId],
-                        (err, items) => {
-
-                            if (err) return reject(err);
-
-                            order.items = items;
-
-                            resolve(order);
-                        }
-                    );
-
-                }
-            );
+        await filterRepository.insert("Order", {
+            orderId: order.orderId,
+            value: order.value,
+            creationDate: order.creationDate
         });
 
-    }
+        for (const item of order.items) {
 
-    listOrders() {
-
-        return new Promise((resolve, reject) => {
-
-            db.all(`SELECT * FROM "Order"`, [], (err, orders) => {
-
-                if (err) return reject(err);
-
-                resolve(orders);
+            await filterRepository.insert("Items", {
+                orderId: order.orderId,
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price
             });
 
+        }
+
+    }
+
+    async getOrder(orderId) {
+
+        const order = await filterRepository.findOne("Order", {
+            orderId: orderId
+        });
+
+        if (!order) return null;
+
+        const items = await filterRepository.findAll("Items", {
+            orderId: orderId
+        });
+
+        order.items = items;
+
+        return order;
+
+    }
+
+    async listOrders() {
+
+        return await filterRepository.findAll("Order");
+
+    }
+
+    async deleteOrder(orderId) {
+
+        await filterRepository.delete("Items", {
+            orderId: orderId
+        });
+
+        return await filterRepository.delete("Order", {
+            orderId: orderId
         });
 
     }
 
-    deleteOrder(orderId) {
+    async updateOrder(order) {
 
-        return new Promise((resolve, reject) => {
+        await filterRepository.update(
+            "Order",
+            {
+                value: order.value,
+                creationDate: order.creationDate
+            },
+            {
+                orderId: order.orderId
+            }
+        );
 
-            db.run(`DELETE FROM Items WHERE orderId = ?`, [orderId]);
-
-            db.run(
-                `DELETE FROM "Order" WHERE orderId = ?`,
-                [orderId],
-                function (err) {
-
-                    if (err) return reject(err);
-
-                    resolve(this.changes);
-                }
-            );
-
+        await filterRepository.delete("Items", {
+            orderId: order.orderId
         });
 
-    }
+        for (const item of order.items) {
 
-    updateOrder(order) {
+            await filterRepository.insert("Items", {
+                orderId: order.orderId,
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price
+            });
 
-        return new Promise((resolve, reject) => {
-
-            db.run(
-                `UPDATE "Order" SET value = ?, creationDate = ? WHERE orderId = ?`,
-                [order.value, order.creationDate, order.orderId],
-                (err) => {
-
-                    if (err) return reject(err);
-
-                    db.run(`DELETE FROM Items WHERE orderId = ?`, [order.orderId]);
-
-                    const stmt = db.prepare(
-                        `INSERT INTO Items(orderId, productId, quantity, price) VALUES (?, ?, ?, ?)`
-                    );
-
-                    order.items.forEach(item => {
-                        stmt.run(order.orderId, item.productId, item.quantity, item.price);
-                    });
-
-                    stmt.finalize();
-
-                    resolve();
-                }
-            );
-
-        });
+        }
 
     }
 
