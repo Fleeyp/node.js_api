@@ -1,10 +1,10 @@
-const filterRepository = require("./filterRepository");
+const baseRepository = require("./baseRepository");
 
 class OrderRepository {
 
     async createOrder(order) {
 
-        await filterRepository.insert("Order", {
+        await baseRepository.insert("Order", {
             orderId: order.orderId,
             value: order.value,
             creationDate: order.creationDate
@@ -12,7 +12,7 @@ class OrderRepository {
 
         for (const item of order.items) {
 
-            await filterRepository.insert("Items", {
+            await baseRepository.insert("Items", {
                 orderId: order.orderId,
                 productId: item.productId,
                 quantity: item.quantity,
@@ -25,13 +25,13 @@ class OrderRepository {
 
     async getOrder(orderId) {
 
-        const order = await filterRepository.findOne("Order", {
+        const order = await baseRepository.findOne("Order", {
             orderId: orderId
         });
 
         if (!order) return null;
 
-        const items = await filterRepository.findAll("Items", {
+        const items = await baseRepository.findAll("Items", {
             orderId: orderId
         });
 
@@ -43,17 +43,17 @@ class OrderRepository {
 
     async listOrders() {
 
-        return await filterRepository.findAll("Order");
+        return await baseRepository.findAll("Order");
 
     }
 
     async deleteOrder(orderId) {
 
-        await filterRepository.delete("Items", {
+        await baseRepository.delete("Items", {
             orderId: orderId
         });
 
-        return await filterRepository.delete("Order", {
+        return await baseRepository.delete("Order", {
             orderId: orderId
         });
 
@@ -61,7 +61,7 @@ class OrderRepository {
 
     async updateOrder(order) {
 
-        await filterRepository.update(
+        await baseRepository.update(
             "Order",
             {
                 value: order.value,
@@ -72,13 +72,13 @@ class OrderRepository {
             }
         );
 
-        await filterRepository.delete("Items", {
+        await baseRepository.delete("Items", {
             orderId: order.orderId
         });
 
         for (const item of order.items) {
 
-            await filterRepository.insert("Items", {
+            await baseRepository.insert("Items", {
                 orderId: order.orderId,
                 productId: item.productId,
                 quantity: item.quantity,

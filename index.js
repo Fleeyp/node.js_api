@@ -1,14 +1,17 @@
+require("dotenv").config();
+
 const express = require("express");
+
 const orderRoutes = require("./routes/orderRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
 app.use(express.json());
 
+app.use("/auth", authRoutes);
 app.use("/order", orderRoutes);
 
-const PORT = 3000;
-
-app.listen(PORT, () => {
-    console.log(`API rodando em http://localhost:${PORT}`);
+app.listen(3000, () => {
+    console.log("API running on port 3000");
 });

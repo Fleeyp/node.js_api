@@ -1,6 +1,6 @@
 const db = require("../config/database");
 
-class FilterRepository {
+class BaseRepository {
 
     findOne(table, filters) {
 
@@ -11,7 +11,7 @@ class FilterRepository {
 
             const conditions = keys.map(key => `${key} = ?`).join(" AND ");
 
-            const query = `SELECT * FROM ${table} WHERE ${conditions} LIMIT 1`;
+            const query = `SELECT * FROM "${table}" WHERE ${conditions} LIMIT 1`;
 
             db.get(query, values, (err, row) => {
 
@@ -29,7 +29,7 @@ class FilterRepository {
 
         return new Promise((resolve, reject) => {
 
-            let query = `SELECT * FROM ${table}`;
+            let query = `SELECT * FROM "${table}"`;
             let values = [];
 
             if (filters) {
@@ -65,7 +65,7 @@ class FilterRepository {
             const placeholders = keys.map(() => "?").join(",");
 
             const query = `
-                INSERT INTO ${table} (${keys.join(",")})
+                INSERT INTO "${table}" (${keys.join(",")})
                 VALUES (${placeholders})
             `;
 
@@ -96,7 +96,7 @@ class FilterRepository {
             const whereClause = filterKeys.map(key => `${key} = ?`).join(" AND ");
 
             const query = `
-                UPDATE ${table}
+                UPDATE "${table}"
                 SET ${setClause}
                 WHERE ${whereClause}
             `;
@@ -127,7 +127,7 @@ class FilterRepository {
             const whereClause = keys.map(key => `${key} = ?`).join(" AND ");
 
             const query = `
-                DELETE FROM ${table}
+                DELETE FROM "${table}"
                 WHERE ${whereClause}
             `;
 
@@ -145,4 +145,4 @@ class FilterRepository {
 
 }
 
-module.exports = new FilterRepository();
+module.exports = new BaseRepository();
