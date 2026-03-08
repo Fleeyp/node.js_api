@@ -13,7 +13,7 @@ describe("OrderService", () => {
             numeroPedido: "123-1",
             dataCriacao: "2024-01-01",
             valorTotal: 1000,
-            itens: []
+            items: []
         };
 
         await orderService.createOrder(mockOrder);
