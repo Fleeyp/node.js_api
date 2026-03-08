@@ -12,6 +12,7 @@ Node.js REST API for managing orders with authentication, using SQLite as a simp
 - **Auth**: `jsonwebtoken` (JWT) + `bcryptjs`
 - **Config**: `dotenv`
 - **Testing**: `jest`
+- **API Documentation**: `swagger-ui-express` + `swagger-jsdoc`
 
 ---
 
@@ -67,7 +68,20 @@ node index.js
 - The server starts on **port 3000**.
 - Console output:
   - `API running on port 3000`
+  - `Swagger documentation available at http://localhost:3000/docs`
   - `Banco conectado.` (database connection)
+
+### API Documentation (Swagger)
+
+Once the server is running, you can access the interactive Swagger documentation at:
+
+**http://localhost:3000/docs**
+
+The Swagger UI provides:
+- Complete API endpoint documentation
+- Request/response schemas
+- Try-it-out functionality to test endpoints directly from the browser
+- Authentication support (use the "Authorize" button to add your JWT token)
 
 ---
 
@@ -238,7 +252,12 @@ Below is a high-level description of the main modules for quick navigation.
 
 - **`index.js`**
   - Entry point.
-  - Loads environment variables, creates the Express app, wires JSON parsing, mounts `authRoutes` on `/auth`, `orderRoutes` on `/order`, and applies the global `errorHandler`.
+  - Loads environment variables, creates the Express app, wires JSON parsing, mounts Swagger UI at `/docs`, mounts `authRoutes` on `/auth`, `orderRoutes` on `/order`, and applies the global `errorHandler`.
+
+- **`config/swagger.js`**
+  - Swagger/OpenAPI configuration.
+  - Defines API schemas, security schemes (JWT Bearer), and server information.
+  - Uses `swagger-jsdoc` to generate the OpenAPI specification from JSDoc comments in route files.
 
 - **`config/database.js`**
   - Creates the SQLite connection (`orders.db`).
@@ -247,6 +266,7 @@ Below is a high-level description of the main modules for quick navigation.
 - **Routes (`routes/`)**
   - **`authRoutes.js`**
     - `POST /auth/login` → `AuthController.login`.
+    - Contains Swagger JSDoc annotations for API documentation.
   - **`orderRoutes.js`**
     - Applies `authMiddleware` to all order routes.
     - Defines:
@@ -255,6 +275,7 @@ Below is a high-level description of the main modules for quick navigation.
       - `GET /order/:id` → `OrderController.get`
       - `PUT /order/:id` → `OrderController.update`
       - `DELETE /order/:id` → `OrderController.delete`
+    - Contains Swagger JSDoc annotations for API documentation.
 
 - **Controllers (`controllers/`)**
   - **`authController.js`**
@@ -325,6 +346,7 @@ Below is a high-level description of the main modules for quick navigation.
   - [ ] `npm install`
   - [ ] `.env` with `JWT_SECRET` created
   - [ ] `node index.js` running (port 3000)
+  - [ ] Access Swagger docs at http://localhost:3000/docs (optional but recommended)
 - **Test flow**:
   - [ ] `POST /auth/login` with `admin / 123456`
   - [ ] Use returned token in `Authorization: Bearer <token>`
