@@ -12,10 +12,9 @@ const app = express();
 
 app.use(express.json());
 
-// Swagger documentation
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "Jitterbit Case API Documentation"
+    customSiteTitle: "Node Js API Documentation"
 }));
 
 app.use("/auth", authRoutes);

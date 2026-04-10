@@ -1,5 +1,3 @@
-## Jitterbit Case – Order API
-
 Node.js REST API for managing orders with authentication, using SQLite as a simple persistence layer. This document is a walkthrough for testers and documents the essential files in the project.
 
 ---
